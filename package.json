@@ -62,6 +62,7 @@
     }
   ],
   "dependencies": {
+    "grunt-contrib-connect": "^1.0.2",
     "jquery": ">=1.5.1"
   },
   "description": "A jump-start for jQuery plugins development.",

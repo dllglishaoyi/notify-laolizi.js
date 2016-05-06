@@ -86,7 +86,22 @@ module.exports = function( grunt ) {
 		watch: {
 			files: [ "src/*", "test/**/*" ],
 			tasks: [ "default" ]
-		}
+		},
+		connect: {
+	      options: {
+	          port: 9000,
+	          open: true,
+	          livereload: 35729,
+	          // Change this to '0.0.0.0' to access the server from outside
+	          hostname: 'localhost'
+	      },
+	      server: {
+	        options: {
+	          port: 9001,
+	          base: './'
+	        }
+	      }
+	    }
 
 	} );
 
@@ -97,9 +112,11 @@ module.exports = function( grunt ) {
 	grunt.loadNpmTasks( "grunt-contrib-coffee" );
 	grunt.loadNpmTasks( "grunt-contrib-watch" );
 	grunt.loadNpmTasks( "grunt-karma" );
+	grunt.loadNpmTasks('grunt-contrib-connect');
 
 	grunt.registerTask( "travis", [ "jshint", "karma:travis" ] );
 	grunt.registerTask( "lint", [ "jshint", "jscs" ] );
 	grunt.registerTask( "build", [ "concat", "uglify" ] );
 	grunt.registerTask( "default", [ "jshint", "build", "karma:unit:run" ] );
+	grunt.registerTask('watchit',['concat','jshint','uglify','connect','watch']);
 };

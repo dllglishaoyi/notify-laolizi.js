@@ -1,66 +1,153 @@
-// the semi-colon before function invocation is a safety net against concatenated
-// scripts and/or other plugins which may not be closed properly.
-;( function( $, window, document, undefined ) {
-
-	"use strict";
-
-		// undefined is used here as the undefined global variable in ECMAScript 3 is
-		// mutable (ie. it can be changed by someone else). undefined isn't really being
-		// passed in so we can ensure the value of it is truly undefined. In ES5, undefined
-		// can no longer be modified.
-
-		// window and document are passed through as local variables rather than global
-		// as this (slightly) quickens the resolution process and can be more efficiently
-		// minified (especially when both are regularly referenced in your plugin).
-
-		// Create the defaults once
-		var pluginName = "defaultPluginName",
-			defaults = {
-				propertyName: "value"
-			};
-
-		// The actual plugin constructor
-		function Plugin ( element, options ) {
-			this.element = element;
-
-			// jQuery has an extend method which merges the contents of two or
-			// more objects, storing the result in the first object. The first object
-			// is generally empty as we don't want to alter the default options for
-			// future instances of the plugin
-			this.settings = $.extend( {}, defaults, options );
-			this._defaults = defaults;
-			this._name = pluginName;
-			this.init();
-		}
-
-		// Avoid Plugin.prototype conflicts
-		$.extend( Plugin.prototype, {
-			init: function() {
-
-				// Place initialization logic here
-				// You already have access to the DOM element and
-				// the options via the instance, e.g. this.element
-				// and this.settings
-				// you can add more functions like the one below and
-				// call them like the example below
-				this.yourOtherFunction( "jQuery Boilerplate" );
-			},
-			yourOtherFunction: function( text ) {
-
-				// some logic
-				$( this.element ).text( text );
-			}
-		} );
-
-		// A really lightweight plugin wrapper around the constructor,
-		// preventing against multiple instantiations
-		$.fn[ pluginName ] = function( options ) {
-			return this.each( function() {
-				if ( !$.data( this, "plugin_" + pluginName ) ) {
-					$.data( this, "plugin_" +
-						pluginName, new Plugin( this, options ) );
+/* author laolizi */
+(function (factory) {
+	// UMD start
+	// https://github.com/umdjs/umd/blob/master/jqueryPluginCommonjs.js
+	if (typeof define === 'function' && define.amd) {
+		// AMD. Register as an anonymous module.
+		define(['jquery'], factory);
+	} else if (typeof module === 'object' && module.exports) {
+		// Node/CommonJS
+		module.exports = function( root, jQuery ) {
+			if ( jQuery === undefined ) {
+				// require('jQuery') returns a factory that requires window to
+				// build a jQuery instance, we normalize how we use modules
+				// that require this pattern but the window provided is a noop
+				// if it's defined (how jquery works)
+				if ( typeof window !== 'undefined' ) {
+					jQuery = require('jquery');
 				}
-			} );
+				else {
+					jQuery = require('jquery')(root);
+				}
+			}
+			factory(jQuery);
+			return jQuery;
 		};
+	} else {
+		// Browser globals
+		factory(jQuery);
+	}
+}(function ($) {
+	$.notificationOptions = {
+		className: '',
+		click: function() {},
+		content: '',
+		duration: 5000,
+		fadeIn: 400,
+		fadeOut: 600,
+		limit: 2,
+		queue: true,
+		slideUp: 200,
+		horizontal: 'right',
+		vertical: 'top',
+		min:1,
+    afterShow: function(){},
+    afterClose: function(){}
+	};
 
-} )( jQuery, window, document );
+	var Notification = function(board, options) {
+		var that = this;
+		// build notification template
+		var htmlElement = options.$el;
+		htmlElement.addClass('notification');
+		// getter for template
+		this.getHtmlElement = function() {
+			return htmlElement;
+		};
+		// custom hide
+		this.hide = function() {
+			htmlElement.addClass('hiding');
+			htmlElement.animate({ opacity: .01 }, options.fadeOut, function() {
+				var queued = queue.shift();
+				if (queued) {
+					$.createNotification(queued);
+				}
+			});
+			htmlElement.slideUp(options.slideUp, function() {
+				$(this).remove();
+        options.afterClose();
+			});
+		};
+		// show in board
+		this.show = function() {
+			// append to board and show
+			htmlElement[options.vertical == 'top' ? 'appendTo' : 'prependTo'](board);
+			htmlElement.fadeIn(options.fadeIn, options.afterShow());
+		};
+		// set custom click callback
+		htmlElement.on('click', function() {
+			options.click.apply(that);
+		});
+		// helper classes to avoid hide when hover
+		htmlElement.on('mouseenter', function() {
+			htmlElement.addClass('hover');
+			if (htmlElement.hasClass('hiding')) {
+				// recover
+				htmlElement.stop(true);
+				// reset slideUp, could not find a better way to achieve this
+				htmlElement.attr('style', 'opacity: ' + htmlElement.css('opacity'));
+				htmlElement.animate({ opacity: 1 }, options.fadeIn);
+				htmlElement.removeClass('hiding');
+				htmlElement.addClass('pending');
+			}
+		});
+		htmlElement.on('mouseleave', function() {
+			if (htmlElement.hasClass('pending')) {
+				// hide was pending
+				that.hide();
+			}
+			htmlElement.removeClass('hover');
+		});
+		// close button bind
+		htmlElement.children('.notify-close').on('click', function() {
+			that.hide();
+		});
+		if (options.duration) {
+			// hide timer
+			setTimeout(function() {
+				if (htmlElement.hasClass('hover')) {
+					// hovering, do not hide now
+					htmlElement.addClass('pending');
+				} else {
+					that.hide();
+				}
+			}, options.duration);
+		}
+		return this;
+	};
+
+	var queue = [];
+
+	$.createNotification = function(options) {
+		options = $.extend({}, $.notificationOptions, options || {});
+		// get notification container (aka board)
+		var $board = $('.laolizi-Barbapapa');
+		if (!$board.length) {
+			board = $('<div class="laolizi-Barbapapa" />');
+			board.css({
+				'position': 'fixed',
+			    'z-index': '9999',
+			    'width':'250px',
+			    'top':0,
+			    'left': '0px',
+				'right': '0px',
+				'margin-left':'auto',
+				'margin-right':'auto'
+			});
+
+			board.appendTo('body');
+		}
+		if (options.limit && board.children('.notification:not(.hiding)').length >= options.limit) {
+			// limit reached
+			if (options.queue) {
+				queue.push(options);
+			}
+			return;
+		}
+		// create new notification and show
+		var notification = new Notification(board, options)
+		notification.show(board);
+		return notification;
+	};
+
+}));
