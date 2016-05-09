@@ -123,8 +123,8 @@
 		// get notification container (aka board)
 		var $board = $('.laolizi-Barbapapa');
 		if (!$board.length) {
-			board = $('<div class="laolizi-Barbapapa" />');
-			board.css({
+			$board = $('<div class="laolizi-Barbapapa" />');
+			$board.css({
 				'position': 'fixed',
 			    'z-index': '9999',
 			    'width':'250px',
@@ -135,9 +135,9 @@
 				'margin-right':'auto'
 			});
 
-			board.appendTo('body');
+			$board.appendTo('body');
 		}
-		if (options.limit && board.children('.notification:not(.hiding)').length >= options.limit) {
+		if (options.limit && $board.children('.notification:not(.hiding)').length >= options.limit) {
 			// limit reached
 			if (options.queue) {
 				queue.push(options);
@@ -145,8 +145,8 @@
 			return;
 		}
 		// create new notification and show
-		var notification = new Notification(board, options)
-		notification.show(board);
+		var notification = new Notification($board, options)
+		notification.show($board);
 		return notification;
 	};
 
