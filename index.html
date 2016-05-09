@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>jQuery Boilerplate</title>
+		<script src="./node_modules/jquery/dist/jquery.min.js"></script>
+		<script src="./src/notify-laolizi.js"></script>
+		<link rel="stylesheet" href="css/agate.css">
+		<script type="text/javascript" src="js/highlight.js"></script>
+		<!-- 新 Bootstrap 核心 CSS 文件 -->
+		<link rel="stylesheet" href="./demo/lib/bootstrap/css/bootstrap.min.css">
+		<script src=".demo/lib/bootstrap/js/bootstrap.min.js"></script>
+		<style type="text/css">
+			html,body{
+				padding: 0;
+				margin: 0;
+			}
+			pre{
+				margin: 0;
+				padding: 0;
+			}
+		</style>
+	</head>
+	<body>
+		<a href="https://github.com/dllglishaoyi/notify-laolizi.js"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/e7bbb0521b397edbd5fe43e7f760759336b5e05f/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f677265656e5f3030373230302e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_green_007200.png"></a>
+
+		<pre>
+		<code class="javascript">
+		hljs.initHighlightingOnLoad();
+		$(function() {
+		    var $el = $('&lt;div&gt;vvv&lt;/div&gt;');
+		    $el.css({
+		        'background':'#000',
+		        'color':'#fff',
+		        'text-align':'center'
+		    });
+	 	    $.createNotification({
+		        $el: $el
+		    });
+		});
+		</code>
+		</pre>
+		<div>
+			<button type="button" class="btn btn-success" id="sample-01">Try it</button>
+		</div>
+		<script>
+			hljs.initHighlightingOnLoad();
+			$( function() {
+				$("#sample-01").click(function(){
+					var $el = $('<div>vvv</div>');
+					$el.css({
+						'background':'#000',
+						'color':'#fff',
+						'text-align':'center'
+					});
+					$.createNotification({
+		                $el: $el
+		            });
+				});
+			} );
+		</script>
+	</body>
+</html>
